@@ -1,27 +1,24 @@
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:image_editor_dove/model/float_text_model.dart';
 
 ///The object taht are moving.
-enum MoveStuff{
+enum MoveStuff {
   non,
   text,
 }
 
-
-enum OperateType{
+enum OperateType {
   non,
-  brush,//drawing path
-  text,//add text to canvas
-  flip,//flip image
-  rotated,//rotate canvas
-  mosaic,//draw mosaic
+  brush, //drawing path
+  text, //add text to canvas
+  flip, //flip image
+  rotated, //rotate canvas
+  mosaic, //draw mosaic
 }
 
 class EditorPanelController {
-
   static const defaultTrashColor = const Color(0x26ffffff);
 
   EditorPanelController() {
@@ -47,11 +44,14 @@ class EditorPanelController {
   ValueNotifier<OperateType> operateType = ValueNotifier(OperateType.non);
 
   ///Is current operate type
-  bool isCurrentOperateType(OperateType type) => type.index == operateType.value.index;
+  bool isCurrentOperateType(OperateType type) =>
+      type.index == operateType.value.index;
 
   /// is need to show second panel.
   ///  * in some operate type like drawing path, it need a 2nd panel for change color.
-  bool show2ndPanel() => operateType.value == OperateType.brush || operateType.value == OperateType.mosaic;
+  bool show2ndPanel() =>
+      operateType.value == OperateType.brush ||
+      operateType.value == OperateType.mosaic;
 
   final List<Color> brushColor = const <Color>[
     Color(0xFFFA4D32),
@@ -73,7 +73,6 @@ class EditorPanelController {
   void switchOperateType(OperateType type) {
     operateType.value = type;
   }
-
 
   ///moving object
   /// * non : not moving.
@@ -119,8 +118,9 @@ class EditorPanelController {
   }
 
   ///release the moving-text.
-  void releaseText(DragEndDetails details, FloatTextModel model, Function throwCall) {
-    if(isThrowText(pointerUpPosition??Offset.zero, model)) {
+  void releaseText(
+      DragEndDetails details, FloatTextModel model, Function throwCall) {
+    if (isThrowText(pointerUpPosition ?? Offset.zero, model)) {
       throwCall.call();
     }
     doIdle();
@@ -145,11 +145,11 @@ class EditorPanelController {
   ///pointer moving's callback
   void pointerMoving(PointerMoveEvent event) {
     pointerUpPosition = event.localPosition;
-    switch(moveStuff) {
+    switch (moveStuff) {
       case MoveStuff.non:
         break;
       case MoveStuff.text:
-        if(movingTarget is FloatTextModel) {
+        if (movingTarget is FloatTextModel) {
           switchTrashCanColor(isThrowText(event.localPosition, movingTarget!));
         }
         break;
@@ -157,36 +157,16 @@ class EditorPanelController {
   }
 
   ///decided whether the text is deleted or not.
-  bool isThrowText(Offset pointer,BaseFloatModel target) {
-    final Rect textR = Rect.fromCenter(center: pointer,
-        width: target.floatSize?.width??1,
-        height: target.floatSize?.height??1);
+  bool isThrowText(Offset pointer, BaseFloatModel target) {
+    final Rect textR = Rect.fromCenter(
+        center: pointer,
+        width: target.floatSize?.width ?? 1,
+        height: target.floatSize?.height ?? 1);
     final Rect tcR = Rect.fromLTWH(
-        screenSize!.width - trashCanPosition.dx,
+        0,
         screenSize!.height - trashCanPosition.dy - tcSize.height,
-        tcSize.width,
-        tcSize.height);
+        screenSize!.width,
+        trashCanPosition.dy + tcSize.height);
     return textR.overlaps(tcR);
   }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
