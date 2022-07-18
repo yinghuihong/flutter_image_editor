@@ -1,5 +1,5 @@
 #import "ImageEditorPlugin.h"
-#if __has_include(<image_editor/image_editor-Swift.h>)
+#if __has_include(<image_editor_dove/image_editor_dove-Swift.h>)
 #import <image_editor_dove/image_editor_dove-Swift.h>
 #else
 // Support project import fallback if the generated compatibility header
