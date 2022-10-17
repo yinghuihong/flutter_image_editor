@@ -124,22 +124,23 @@ class ImageEditorState extends State<ImageEditor>
           await File('${paths.path}/' + DateTime.now().toString() + '.jpg')
               .create();
       file.writeAsBytes(pngBytes ?? []);
-      decodeImg().then((value) {
-        if (value == null) {
-          Navigator.pop(context);
-        } else {
-          Navigator.pop(
-              context, EditorImageResult(value.width, value.height, file));
-        }
-      }).catchError((e) {
-        Navigator.pop(context);
-      });
+      // decodeImg().then((value) {
+      //   if (value == null) {
+      //     Navigator.pop(context);
+      //   } else {
+      //     Navigator.pop(
+      //         context, EditorImageResult(value.width, value.height, file));
+      //   }
+      // }).catchError((e) {
+      //   Navigator.pop(context);
+      // });
+      Navigator.pop(context, file);
     });
   }
 
-  Future<ui.Image?> decodeImg() async {
-    return await decodeImageFromList(widget.originImage.readAsBytesSync());
-  }
+  // Future<ui.Image?> decodeImg() async {
+  //   return await decodeImageFromList(widget.originImage.readAsBytesSync());
+  // }
 
   static ImageEditorState? of(BuildContext context) {
     return context.findAncestorStateOfType<ImageEditorState>();
@@ -160,13 +161,46 @@ class ImageEditorState extends State<ImageEditor>
             2,
         _panelController.trashCanPosition.dy);
     return Material(
-      color: Colors.black,
+      color: Colors.transparent,
       child: Listener(
         onPointerMove: (v) {
           _panelController.pointerMoving(v);
         },
         child: Stack(
           children: [
+            //canvas
+            Positioned.fromRect(
+                rect: Rect.fromLTWH(0, headerHeight, screenWidth, canvasHeight),
+                child: RepaintBoundary(
+                  key: _boundaryKey,
+                  child: RotatedBox(
+                    quarterTurns: rotateValue,
+                    child: Container(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          _buildImage(),
+                          _buildBrushCanvas(),
+                          buildTextCanvas(),
+                        ],
+                      ),
+                    ),
+                  ),
+                )),
+            ValueListenableBuilder<bool>(
+              valueListenable: _panelController.takeShot,
+              builder: (ctx, _saving, child) {
+                return Positioned(
+                    bottom: 0,
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: _saving
+                        ? const Center(child: CircularProgressIndicator())
+                        : const SizedBox(),
+                  );
+              },
+            ),
             //appBar
             ValueListenableBuilder<bool>(
                 valueListenable: _panelController.showAppBar,
@@ -184,30 +218,13 @@ class ImageEditorState extends State<ImageEditor>
                                 iconTheme: const IconThemeData(
                                     color: Colors.white, size: 16),
                                 leading: backWidget(),
-                                backgroundColor: Colors.transparent,
+                                backgroundColor: Colors.black,
                                 actions: [resetWidget(onTap: resetCanvasPlate)],
                               ),
                             );
                           }),
                       duration: _panelController.panelDuration);
                 }),
-            //canvas
-            Positioned.fromRect(
-                rect: Rect.fromLTWH(0, headerHeight, screenWidth, canvasHeight),
-                child: RepaintBoundary(
-                  key: _boundaryKey,
-                  child: RotatedBox(
-                    quarterTurns: rotateValue,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        _buildImage(),
-                        _buildBrushCanvas(),
-                        buildTextCanvas(),
-                      ],
-                    ),
-                  ),
-                )),
             //bottom operation(control) bar
             ValueListenableBuilder<bool>(
                 valueListenable: _panelController.showBottomBar,
